@@ -4,7 +4,7 @@ inputs:
   architectures:
     description: 'A CSV list of the architectures to build the docker image for'
     required: false
-    default: 'darwin/amd64,darwin/arm64,linux/amd64,linux/arm64,windows/amd64,windows/arm64'
+    default: 'linux/amd64,linux/arm64d'
   buildArgs:
     description: 'A list of build arguments to pass to the build context'
     required: false
