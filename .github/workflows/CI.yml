@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build & Verify
-        uses: ./.github/actions/go-build
+        uses: projectkeas/.engineering/.github/actions/go-build
       - name: Build Docker Image
-        uses: ./.github/actions/docker-build
+        uses: projectkeas/.engineering/.github/actions/docker-build
         with:
           pushImagesOnComplete: 'false'
