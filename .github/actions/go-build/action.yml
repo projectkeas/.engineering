@@ -35,20 +35,19 @@ runs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: "Check for 'go.mod'"
-      uses: andstor/file-existence-action@v1
-      with:
-        files: "go.mod"
-
     - name: Verify dependencies
       if: steps.check_files.outputs.files_exists == 'true'
       shell: bash
       run: |
-        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-        do
-          GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
-          GOOS=${i%/*} GOARCH=${i#*/} go mod verify
-        done
+        if [ -f "go.mod" ]
+          for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
+          do
+            GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
+            GOOS=${i%/*} GOARCH=${i#*/} go mod verify
+          done
+        else
+          echo 'Skipping 'go mod' verification as go.mod doesn't exist'
+        fi
 
     - name: Build
       if: ${{ inputs.outputDirectory == '' }}
