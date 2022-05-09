@@ -39,17 +39,13 @@ runs:
       if: steps.check_files.outputs.files_exists == 'true'
       shell: bash
       run: |
-        if [ -f "go.mod" ]
-          for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-          do
-            echo "::group::Running 'go mod' for '$i'"
-            GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
-            GOOS=${i%/*} GOARCH=${i#*/} go mod verify
-            echo "::endgroup::"
-          done
-        else
-          echo 'Skipping 'go mod' verification as go.mod doesn't exist'
-        fi
+        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
+        do
+          echo "::group::Running 'go mod' for '$i'"
+          GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
+          GOOS=${i%/*} GOARCH=${i#*/} go mod verify
+          echo "::endgroup::"
+        done
 
     - name: Build
       if: ${{ inputs.outputDirectory == '' }}
