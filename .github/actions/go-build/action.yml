@@ -42,8 +42,10 @@ runs:
         if [ -f "go.mod" ]
           for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
           do
+            echo "::group::Running 'go mod' for '$i'"
             GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
             GOOS=${i%/*} GOARCH=${i#*/} go mod verify
+            echo "::endgroup::"
           done
         else
           echo 'Skipping 'go mod' verification as go.mod doesn't exist'
@@ -55,8 +57,9 @@ runs:
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
-          GOOS=${i%/*} GOARCH=${i#*/} go build -v ./...
-          GOOS=${i%/*} GOARCH=${i#*/} go build -v ./...
+          echo "::group::Running 'go build' for '$i'"
+          GOOS=${i%/*} GOARCH=${i#*/} go build -v
+          echo "::endgroup::"
         done
 
     - name: Build
@@ -65,8 +68,9 @@ runs:
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
-          GOOS=${i%/*} GOARCH=${i#*/} go build -o ${{ inputs.outputDirectory }} -v ./...
-          GOOS=${i%/*} GOARCH=${i#*/} go build -o ${{ inputs.outputDirectory }} -v ./...
+          echo "::group::Running 'go build' for '$i'"
+          GOOS=${i%/*} GOARCH=${i#*/} go build -o ${{ inputs.outputDirectory }} -v
+          echo "::endgroup::"
         done
 
     - name: Run go vet
@@ -74,7 +78,9 @@ runs:
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
+          echo "::group::Running 'go vet' for '$i'"
           GOOS=${i%/*} GOARCH=${i#*/} go vet
+          echo "::endgroup::"
         done
 
     - name: Run StaticCheck
@@ -88,5 +94,7 @@ runs:
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
-          GOOS=${i%/*} GOARCH=${i#*/} go test -race -vet=off ./...
+          echo "::group::Running 'test vet' for '$i'"
+          GOOS=${i%/*} GOARCH=${i#*/} go test
+          echo "::endgroup::"
         done
