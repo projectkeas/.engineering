@@ -36,6 +36,7 @@ runs:
           ${{ runner.os }}-go-
 
     - name: Verify dependencies
+      shell: bash
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
@@ -45,6 +46,7 @@ runs:
 
     - name: Build
       if: ${{ inputs.outputDirectory == '' }}
+      shell: bash
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
@@ -54,6 +56,7 @@ runs:
 
     - name: Build
       if: ${{ inputs.outputDirectory != '' }}
+      shell: bash
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
@@ -62,7 +65,8 @@ runs:
         done
 
     - name: Run go vet
-      run:  |
+      shell: bash
+      run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
           GOOS=${i%/*} GOARCH=${i#*/} go vet
@@ -75,7 +79,8 @@ runs:
         install-go: false
 
     - name: Run tests
-      run:  |
+      shell: bash
+      run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
           GOOS=${i%/*} GOARCH=${i#*/} go test -race -vet=off ./...
