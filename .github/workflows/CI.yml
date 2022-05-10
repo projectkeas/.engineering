@@ -2,6 +2,11 @@ name: CI
 
 on:
   workflow_call:
+    inputs:
+      fetchDepth:
+        required: false
+        type: number
+        default: 1
 
 jobs:
   build:
@@ -10,6 +15,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
+          fetchDepth: ${{ inputs.fetchDepth }}
           submodules: 'true'
       - name: Build & Verify
         uses: projectkeas/.engineering/.github/actions/go-build@main
