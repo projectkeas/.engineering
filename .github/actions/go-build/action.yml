@@ -65,8 +65,8 @@ runs:
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
         do
           echo "::group::Running 'go build' for '$i'"
-          $os=${i%/*}
-          $arch=${i#*/}
+          os=${i%/*}
+          arch=${i#*/}
           GOOS=$os GOARCH=$arch go build -o ${{ inputs.outputDirectory }}/app-$os-$arch -v
           echo "::endgroup::"
         done
