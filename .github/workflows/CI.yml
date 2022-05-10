@@ -15,7 +15,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          fetchDepth: ${{ inputs.fetchDepth }}
+          fetch-depth: ${{ inputs.fetchDepth }}
           submodules: 'true'
       - name: Build & Verify
         uses: projectkeas/.engineering/.github/actions/go-build@main
