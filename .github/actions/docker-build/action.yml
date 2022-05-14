@@ -28,6 +28,7 @@ inputs:
   token:
     description: 'The Github token that is used to publish the container images'
     required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
 runs:
   using: 'composite'
   steps:
