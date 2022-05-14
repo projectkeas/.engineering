@@ -7,6 +7,9 @@ on:
         required: false
         type: number
         default: 1
+      token:
+        required: true
+        type: string
       tags:
         required: true
         type: string
@@ -31,5 +34,6 @@ jobs:
         uses: projectkeas/.engineering/.github/actions/docker-build@main
         with:
           context: ./out
+          token: ${{ inputs.token }}
           pushImagesOnComplete: ${{ inputs.pushImagesOnComplete }}
           tags: ${{ inputs.tags }}
