@@ -12,10 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
-          gh repo list --source --json nameWithOwner -t '{{range .}}{{tablerow .nameWithOwner}}{{end}}' projectkeas > repos.txt
-          echo $(cat repos.txt)
-          echo '::set-output name=repos::$(cat repos.txt)'
+          gh repo list --source --json nameWithOwner -t '{{range .}}{{tablerow .nameWithOwner}}{{end}}' projectkeas
         shell: bash
         id: listRepos
       - uses: micnncim/action-label-syncer@v1
@@ -24,4 +21,7 @@ jobs:
         with:
           manifest: .github/labels.yml
           repository: |
-            ${{ steps.listRepos.outputs.repos }}
+            projectkeas/.engineering
+            projectkeas/.github
+            projectkeas/.template-service
+            projectkeas/service-test
