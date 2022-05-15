@@ -14,8 +14,8 @@ jobs:
       - run: |
           echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
           gh repo list --source --json nameWithOwner -t '{{range .}}{{tablerow .nameWithOwner}}{{end}}' projectkeas > repos.txt
-          echo ${cat repos.txt}
-          echo '::set-output name=repos::${cat repos.txt}'
+          echo $(cat repos.txt)
+          echo '::set-output name=repos::$(cat repos.txt)'
         shell: bash
         id: listRepos
       - uses: micnncim/action-label-syncer@v1
