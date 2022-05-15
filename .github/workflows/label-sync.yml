@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-          echo '::set-output name=repos::${gh repo list --source --json nameWithOwner -t '{{range .}}{{tablerow .nameWithOwner}}{{end}}' projectkeas}'
+          repos=${gh repo list --source --json nameWithOwner -t '{{range .}}{{tablerow .nameWithOwner}}{{end}}' projectkeas}
+          echo $repos
+          echo '::set-output name=repos::$repos'
         shell: bash
         id: listRepos
       - uses: micnncim/action-label-syncer@v1
