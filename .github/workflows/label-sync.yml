@@ -20,4 +20,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ALL_REPO_PAT }}
         with:
           manifest: .github/labels.yml
-          repositories: ${{ steps.listRepos.outputs.repos }}
+          repository: ${{ steps.listRepos.outputs.repos }}
