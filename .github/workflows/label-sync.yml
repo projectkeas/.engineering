@@ -1,0 +1,23 @@
+name: Sync Labels
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/labels.yml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          echo '::set-output name=repos::${gh repo list --source --json nameWithOwner -t '{{range .}}{{tablerow .nameWithOwner}}{{end}}' projectkeas}'
+        shell: bash
+        id: listRepos
+      - uses: micnncim/action-label-syncer@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ALL_REPO_PAT }}
+        with:
+          manifest: .github/labels.yml
+          repositories: ${{ steps.listRepos.outputs.repos }}
