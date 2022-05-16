@@ -1,7 +1,5 @@
 {
-  "extends": [
-    "config:base"
-  ],
+  "extends": [ "config:base", ":disableDependencyDashboard" ],
   "addLabels": ["type: dependencies"],
   "groupName": "all dependencies",
   "groupSlug": "all",
