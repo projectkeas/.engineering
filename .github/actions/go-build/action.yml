@@ -1,6 +1,9 @@
 name: 'GoLang - Build'
 description: 'Builds multiple versions of a Go service complete with test coverage'
 inputs:
+  appName:
+    description: The name of the application that's being built
+    required: true
   architectures:
     description: 'A CSV list of the architectures to build the docker image for'
     required: false
@@ -67,7 +70,7 @@ runs:
           echo "::group::Running 'go build' for '$i'"
           os=${i%/*}
           arch=${i#*/}
-          GOOS=$os GOARCH=$arch go build -o ${{ inputs.outputDirectory }}/app-$os-$arch -v
+          GOOS=$os GOARCH=$arch go build -o ${{ inputs.outputDirectory }}/${{ inputs.appName }}-$os-$arch -v
           echo "::endgroup::"
         done
 
