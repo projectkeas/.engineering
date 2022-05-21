@@ -27,15 +27,22 @@
 # Type labels
 - color: 1D76DB
   name: 'type: breaking'
+  description: Represents a breaking change to the API surface
 - color: 1D76DB
   name: 'type: feature'
+  description: Represents a new feature that's been added
 - color: 1D76DB
   name: 'type: bug'
+  description: Represents a bug that has been fixed
 - color: 1D76DB
   name: 'type: maintenance'
+  description: Represents a chore that has been completed, such as updating a dockerfile
 - color: 1D76DB
   name: 'type: docs'
+  description: Represents a change to the documentation
 - color: 1D76DB
   name: 'type: dependencies'
+  description: Represents an automated change to the dependencies
 - color: 1D76DB
   name: 'type: security'
+  description: Represents a security issue
