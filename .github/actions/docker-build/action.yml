@@ -13,21 +13,30 @@ inputs:
     description: 'The context directory to pass to the build. Default: .'
     required: false
     default: '.'
+  cosignPublicKey:
+    description: 'The public key used to verify the signed container'
+    required: false
+    default: ''
+  cosignPrivateKeyPassword:
+    description: 'The password to unlock the signing private key'
+    required: false
+    default: ''
   dockerfile:
     description: 'The Dockerfile that you wish to build. Default: ./Dockerfile'
     required: false
     default: './Dockerfile'
+  imageName:
+    description: 'The name of the image that you want to push. Default: user/repo'
+    required: false
+    default: ${{ github.repository }}
   pushImagesOnComplete:
     description: 'Whether or not to push the docker images after the build completes. Default: false'
     required: false
     default: 'false'
-  tags:
-    description: 'A comma separated list of tags that you want to build.'
-    required: false
-    default: 'test'
   token:
     description: 'The Github token that is used to publish the container images'
     required: false
+    default: ${{ github.token }}
 runs:
   using: 'composite'
   steps:
@@ -35,9 +44,11 @@ runs:
       uses: docker/setup-qemu-action@master
       with:
         platforms: ${{ inputs.architectures }}
+
     - uses: docker/setup-buildx-action@v2
       with:
         install: true
+
     - name: Cache Docker layers
       uses: actions/cache@v3
       with:
@@ -45,6 +56,16 @@ runs:
         key: buildx-${{ hashFiles(inputs.dockerfile, inputs.context) }}
         restore-keys: |
           buildx-
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ inputs.imageName }}
+        tags: |
+          type=sha
+          type=semver,pattern={{version}}
+
     - name: Github Packages Login
       uses: docker/login-action@v2
       if: ${{ inputs.pushImagesOnComplete == 'true' }}
@@ -52,6 +73,7 @@ runs:
         registry: 'ghcr.io'
         username: ${{ github.actor }}
         password: ${{ inputs.token }}
+
     - name: Build
       uses: docker/build-push-action@v3
       with:
@@ -64,4 +86,28 @@ runs:
         outputs: type=image
         platforms: ${{ inputs.architectures }}
         push: ${{ inputs.pushImagesOnComplete }}
-        tags: ${{ inputs.tags }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Check Supplychain
+      if: ${{ inputs.PushImagesOnComplete == 'true' }}
+      shell: bash
+      env:
+        COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
+      run: |
+        echo "Creating container attestation..."
+        COSIGN_PASSWORD=${{ inputs.cosignPrivateKeyPassword }} syft attest --key cosign.key -o spdx-json --recursive ${{ steps.meta.outputs.tags }} > ${{ inputs.context }}/container.att.json
+
+        echo "Checking for vulnerabilities..."
+        grype ${{ steps.meta.outputs.tags }} --add-cpes-if-none --fail-on critical --scope AllLayers
+
+    - name: Sign with cosign
+      if: ${{ inputs.PushImagesOnComplete == 'true' }}
+      shell: bash
+      env:
+        COSIGN_PUBLIC_KEY: ${{ inputs.cosignPublicKey }}
+        COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
+        TAGS: ${{ steps.meta.outputs.tags }}
+      run: |
+        cosign sign -r --key cosign.key ${TAGS}
+        cosign verify --key env://COSIGN_PUBLIC_KEY ${TAGS}

@@ -1,0 +1,16 @@
+name: Publish Release Assets
+description: 'Sets up the necessary tools for supply chain security such as cosign, syft and grype'
+inputs:
+  outputDirectory:
+    description: 'The directory of which files to upload'
+    required: false
+    default: ./out
+runs:
+  using: 'composite'
+  steps:
+    - name: Upload release files
+      if: ${{ github.event_name == "release" && github.event.action == "published" }}
+      shell: bash
+      run: |
+        echo ${{ github.token }} | gh auth login --with-token
+        ls ${{ inputs.outputDirectory }} | while read filename;do gh release upload ${{ github.event.release.tag_name }} ${{ inputs.outputDirectory }}$filename; done
