@@ -15,7 +15,7 @@ inputs:
   outputDirectory:
     description: 'The directory of the binaries that are built'
     required: false
-    default: ''
+    default: './out'
   version:
     description: 'The version of Go to use'
     required: false
@@ -39,7 +39,6 @@ runs:
           ${{ runner.os }}-go-
 
     - name: Verify dependencies
-      if: steps.check_files.outputs.files_exists == 'true'
       shell: bash
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
@@ -51,18 +50,6 @@ runs:
         done
 
     - name: Build
-      if: ${{ inputs.outputDirectory == '' }}
-      shell: bash
-      run: |
-        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-        do
-          echo "::group::Running 'go build' for '$i'"
-          GOOS=${i%/*} GOARCH=${i#*/} go build -v
-          echo "::endgroup::"
-        done
-
-    - name: Build
-      if: ${{ inputs.outputDirectory != '' }}
       shell: bash
       run: |
         for i in $(echo ${{ inputs.architectures }} | tr "," "\n")

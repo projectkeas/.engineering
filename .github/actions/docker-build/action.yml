@@ -37,13 +37,10 @@ inputs:
     description: 'Whether or not to push the docker images after the build completes. Default: false'
     required: false
     default: 'false'
-  tags:
-    description: 'A comma separated list of tags that you want to build.'
-    required: false
-    default: 'test'
   token:
     description: 'The Github token that is used to publish the container images'
     required: false
+    default: ${{ github.token }}
 runs:
   using: 'composite'
   steps:
@@ -96,34 +93,15 @@ runs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 
-    - name: Setup cosign
-      #if: ${{ inputs.PushImagesOnComplete == 'true' }}
-      uses: sigstore/cosign-installer@main
-
-    - name: SBOM
+    - name: Check Supplychain
       #if: ${{ inputs.PushImagesOnComplete == 'true' }}
       shell: bash
       run: |
-        # Install syft & grype
-        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-
-        # Setup the cosign key
-        echo "${{ inputs.cosignPrivateKey }}" > cosign.key
-
         # Attest the docker image
-        COSIGN_PASSWORD=$(cat password.txt) ./syft attest --key cosign.key -o spdx-json --recursive ${{ steps.meta.outputs.tags }} > out/container.att.json
+        COSIGN_PASSWORD=${{ inputs.cosignPrivateKeyPassword }} ./syft attest --key cosign.key -o spdx-json --recursive ${{ steps.meta.outputs.tags }} > out/container.att.json
 
         # Check for vulnerabilities
         grype out/container.sbom.json --add-cpes-if-none --fail-on critical --scope AllLayers
-
-    - uses: anchore/sbom-action@v0
-      #if: ${{ inputs.PushImagesOnComplete == 'true' }}
-      with:
-        image: ${{ steps.meta.outputs.tags }}
-        artifact-name: docker.sbom.json
-        output-file: out/docker.sbom.json
-        dependency-snapshot: true
 
     - name: Sign with cosign
       #if: ${{ inputs.PushImagesOnComplete == 'true' }}
@@ -134,5 +112,5 @@ runs:
         COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
         TAGS: ${{ steps.meta.outputs.tags }}
       run: |
-        cosign sign -r --key env://COSIGN_PRIVATE_KEY ${TAGS}
-        cosign verify --key env://COSIGN_PUBLIC_KEY ${TAGS}
+        cosign sign -r --key cosign.key ${TAGS}
+        cosign verify --key cosign.key ${TAGS}

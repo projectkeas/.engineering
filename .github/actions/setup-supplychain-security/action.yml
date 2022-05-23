@@ -1,0 +1,25 @@
+name: 'Setup Supplychain Security'
+description: 'Sets up the necessary tools for supply chain security such as cosign, syft and grype'
+inputs:
+  cosignPrivateKey:
+    description: ""
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - name: "Install sigstore/cosign"
+      uses: sigstore/cosign-installer@main
+
+    - name: Configure cosign.key
+      if: ${{ inputs.cosignPrivateKey != '' }}
+      shell: bash
+      run: echo "${{ inputs.cosignPrivateKey }}" > cosign.key
+
+    - name: Install anchore/syft
+      shell: bash
+      run: curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+    - name: Install anchore/grype
+      shell: bash
+      run: curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
