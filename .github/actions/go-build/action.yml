@@ -30,24 +30,24 @@ runs:
         go-version: ${{ inputs.version }}
         check-latest: ${{ inputs.checkForLatestVersion }}
 
-    - name: Cache Go Modules
-      uses: actions/cache@v3
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+    # - name: Cache Go Modules
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: ~/go/pkg/mod
+    #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-go-
 
-    - name: Verify dependencies
-      shell: bash
-      run: |
-        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-        do
-          echo "::group::Running 'go mod' for '$i'"
-          GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
-          GOOS=${i%/*} GOARCH=${i#*/} go mod verify
-          echo "::endgroup::"
-        done
+    # - name: Verify dependencies
+    #   shell: bash
+    #   run: |
+    #     for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
+    #     do
+    #       echo "::group::Running 'go mod' for '$i'"
+    #       GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
+    #       GOOS=${i%/*} GOARCH=${i#*/} go mod verify
+    #       echo "::endgroup::"
+    #     done
 
     - name: Build
       shell: bash
@@ -61,29 +61,30 @@ runs:
           GOOS=$os GOARCH=$arch go build -o ${{ inputs.outputDirectory }}/${{ inputs.appName }}-$os-$arch
           echo "::endgroup::"
         done
+        ls ${{ inputs.outputDirectory }}
 
-    - name: Run go vet
-      shell: bash
-      run: |
-        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-        do
-          echo "::group::Running 'go vet' for '$i'"
-          GOOS=${i%/*} GOARCH=${i#*/} go vet
-          echo "::endgroup::"
-        done
+    # - name: Run go vet
+    #   shell: bash
+    #   run: |
+    #     for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
+    #     do
+    #       echo "::group::Running 'go vet' for '$i'"
+    #       GOOS=${i%/*} GOARCH=${i#*/} go vet
+    #       echo "::endgroup::"
+    #     done
 
-    - name: Run StaticCheck
-      uses: dominikh/staticcheck-action@v1.2.0
-      with:
-        version: latest
-        install-go: false
+    # - name: Run StaticCheck
+    #   uses: dominikh/staticcheck-action@v1.2.0
+    #   with:
+    #     version: latest
+    #     install-go: false
 
-    - name: Run tests
-      shell: bash
-      run: |
-        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-        do
-          echo "::group::Running 'test vet' for '$i'"
-          GOOS=${i%/*} GOARCH=${i#*/} go test
-          echo "::endgroup::"
-        done
+    # - name: Run tests
+    #   shell: bash
+    #   run: |
+    #     for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
+    #     do
+    #       echo "::group::Running 'test vet' for '$i'"
+    #       GOOS=${i%/*} GOARCH=${i#*/} go test
+    #       echo "::endgroup::"
+    #     done
