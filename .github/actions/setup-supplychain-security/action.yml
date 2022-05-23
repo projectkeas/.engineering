@@ -21,9 +21,11 @@ runs:
       run: |
         curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b $HOME/.syft
         echo "$HOME/.syft" >> $GITHUB_PATH
+        syft version
 
     - name: Install anchore/grype
       shell: bash
       run: |
         curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b $HOME/.grype
         echo "$HOME/.grype" >> $GITHUB_PATH
+        grype version
