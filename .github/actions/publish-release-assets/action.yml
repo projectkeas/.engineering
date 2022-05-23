@@ -9,7 +9,7 @@ runs:
   using: 'composite'
   steps:
     - name: Upload release files
-      if: ${{ github.event_name == "release" && github.event.action == "published" }}
+      if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
       shell: bash
       run: |
         echo ${{ github.token }} | gh auth login --with-token
