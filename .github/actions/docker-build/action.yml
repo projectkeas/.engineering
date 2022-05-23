@@ -90,19 +90,19 @@ runs:
         labels: ${{ steps.meta.outputs.labels }}
 
     - name: Check Supplychain
-      #if: ${{ inputs.PushImagesOnComplete == 'true' }}
+      if: ${{ inputs.PushImagesOnComplete == 'true' }}
       shell: bash
       env:
         COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
       run: |
-        # Attest the docker image
+        echo "Creating container attestation..."
         COSIGN_PASSWORD=${{ inputs.cosignPrivateKeyPassword }} syft attest --key cosign.key -o spdx-json --recursive ${{ steps.meta.outputs.tags }} > ${{ inputs.context }}/container.att.json
 
-        # Check for vulnerabilities
-        grype ${{ inputs.context }}/container.sbom.json --add-cpes-if-none --fail-on critical --scope AllLayers
+        echo "Checking for vulnerabilities..."
+        grype ${{ steps.meta.outputs.tags }} --add-cpes-if-none --fail-on critical --scope AllLayers
 
     - name: Sign with cosign
-      #if: ${{ inputs.PushImagesOnComplete == 'true' }}
+      if: ${{ inputs.PushImagesOnComplete == 'true' }}
       shell: bash
       env:
         COSIGN_PUBLIC_KEY: ${{ inputs.cosignPublicKey }}
