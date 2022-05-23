@@ -18,8 +18,12 @@ runs:
 
     - name: Install anchore/syft
       shell: bash
-      run: curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b $HOME/.syft
+        echo "$HOME/.syft" >> $GITHUB_PATH
 
     - name: Install anchore/grype
       shell: bash
-      run: curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b $HOME/.grype
+        echo "$HOME/.grype" >> $GITHUB_PATH
