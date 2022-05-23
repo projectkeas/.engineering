@@ -13,10 +13,6 @@ inputs:
     description: 'The context directory to pass to the build. Default: .'
     required: false
     default: '.'
-  cosignPrivateKey:
-    description: 'The private key used to sign the container image'
-    required: false
-    default: ''
   cosignPublicKey:
     description: 'The public key used to verify the signed container'
     required: false
@@ -96,6 +92,8 @@ runs:
     - name: Check Supplychain
       #if: ${{ inputs.PushImagesOnComplete == 'true' }}
       shell: bash
+      env:
+        COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
       run: |
         # Attest the docker image
         COSIGN_PASSWORD=${{ inputs.cosignPrivateKeyPassword }} ./syft attest --key cosign.key -o spdx-json --recursive ${{ steps.meta.outputs.tags }} > out/container.att.json
@@ -107,7 +105,6 @@ runs:
       #if: ${{ inputs.PushImagesOnComplete == 'true' }}
       shell: bash
       env:
-        COSIGN_PRIVATE_KEY: ${{ inputs.cosignPrivateKey }}
         COSIGN_PUBLIC_KEY: ${{ inputs.cosignPublicKey }}
         COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
         TAGS: ${{ steps.meta.outputs.tags }}
