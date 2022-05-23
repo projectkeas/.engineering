@@ -57,7 +57,8 @@ runs:
           echo "::group::Running 'go build' for '$i'"
           os=${i%/*}
           arch=${i#*/}
-          GOOS=$os GOARCH=$arch go build -o ${{ inputs.outputDirectory }}/${{ inputs.appName }}-$os-$arch -v
+          echo "Building 'out/${{ inputs.outputDirectory }}/${{ inputs.appName }}-$os-$arch'..."
+          GOOS=$os GOARCH=$arch go build -o ${{ inputs.outputDirectory }}/${{ inputs.appName }}-$os-$arch
           echo "::endgroup::"
         done
 
