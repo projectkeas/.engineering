@@ -12,6 +12,14 @@ inputs:
     description: 'Check to see whether the version of Go to use is the latest version and download if appropriate'
     required: false
     default: 'true'
+  cosignPublicKey:
+    description: 'The public key used to verify the signed container'
+    required: false
+    default: ''
+  cosignPrivateKeyPassword:
+    description: 'The password to unlock the signing private key'
+    required: false
+    default: ''
   outputDirectory:
     description: 'The directory of the binaries that are built'
     required: false
@@ -19,7 +27,7 @@ inputs:
   version:
     description: 'The version of Go to use'
     required: false
-    default: '1.18.1'
+    default: '1.18.2'
 
 runs:
   using: 'composite'
@@ -30,24 +38,24 @@ runs:
         go-version: ${{ inputs.version }}
         check-latest: ${{ inputs.checkForLatestVersion }}
 
-    # - name: Cache Go Modules
-    #   uses: actions/cache@v3
-    #   with:
-    #     path: ~/go/pkg/mod
-    #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-go-
+    - name: Cache Go Modules
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
 
-    # - name: Verify dependencies
-    #   shell: bash
-    #   run: |
-    #     for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-    #     do
-    #       echo "::group::Running 'go mod' for '$i'"
-    #       GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
-    #       GOOS=${i%/*} GOARCH=${i#*/} go mod verify
-    #       echo "::endgroup::"
-    #     done
+    - name: Verify dependencies
+      shell: bash
+      run: |
+        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
+        do
+          echo "::group::Running 'go mod' for '$i'"
+          GOOS=${i%/*} GOARCH=${i#*/} go mod tidy
+          GOOS=${i%/*} GOARCH=${i#*/} go mod verify
+          echo "::endgroup::"
+        done
 
     - name: Build
       shell: bash
@@ -63,28 +71,42 @@ runs:
         done
         ls ${{ inputs.outputDirectory }}
 
-    # - name: Run go vet
-    #   shell: bash
-    #   run: |
-    #     for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-    #     do
-    #       echo "::group::Running 'go vet' for '$i'"
-    #       GOOS=${i%/*} GOARCH=${i#*/} go vet
-    #       echo "::endgroup::"
-    #     done
+    - name: Run go vet
+      shell: bash
+      run: |
+        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
+        do
+          echo "::group::Running 'go vet' for '$i'"
+          GOOS=${i%/*} GOARCH=${i#*/} go vet
+          echo "::endgroup::"
+        done
 
-    # - name: Run StaticCheck
-    #   uses: dominikh/staticcheck-action@v1.2.0
-    #   with:
-    #     version: latest
-    #     install-go: false
+    - name: Run StaticCheck
+      uses: dominikh/staticcheck-action@v1.2.0
+      with:
+        version: latest
+        install-go: false
 
-    # - name: Run tests
-    #   shell: bash
-    #   run: |
-    #     for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
-    #     do
-    #       echo "::group::Running 'test vet' for '$i'"
-    #       GOOS=${i%/*} GOARCH=${i#*/} go test
-    #       echo "::endgroup::"
-    #     done
+    - name: Run tests
+      shell: bash
+      run: |
+        for i in $(echo ${{ inputs.architectures }} | tr "," "\n")
+        do
+          echo "::group::Running 'test vet' for '$i'"
+          GOOS=${i%/*} GOARCH=${i#*/} go test
+          echo "::endgroup::"
+        done
+
+    - name: Sign Artefacts
+      if: ${{ inputs.cosignPrivateKeyPassword != '' && inputs.cosignPublicKey != '' }}
+      shell: bash
+      working-directory: ${{ inputs.outputDirectory }}
+      env:
+        COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
+        COSIGN_PUBLIC_KEY: ${{ inputs.cosignPublicKey }}
+      run: |
+        for filename in ./ ; do
+          [ -e "$filename" ] || continue
+          cosign sign-blob --key cosign.key --output-signature "$filename.sig" --output-certificate "$filename.pem" $filename 
+          cosign verify-blob --key env://COSIGN_PUBLIC_KEY --signature "$filename.sig" $filename
+        done
