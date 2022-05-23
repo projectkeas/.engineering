@@ -13,10 +13,26 @@ inputs:
     description: 'The context directory to pass to the build. Default: .'
     required: false
     default: '.'
+  cosignPrivateKey:
+    description: 'The private key used to sign the container image'
+    required: false
+    default: ''
+  cosignPublicKey:
+    description: 'The public key used to verify the signed container'
+    required: false
+    default: ''
+  cosignPrivateKeyPassword:
+    description: 'The password to unlock the signing private key'
+    required: false
+    default: ''
   dockerfile:
     description: 'The Dockerfile that you wish to build. Default: ./Dockerfile'
     required: false
     default: './Dockerfile'
+  imageName:
+    description: 'The name of the image that you want to push. Default: user/repo'
+    required: false
+    default: ${{ github.repository }}
   pushImagesOnComplete:
     description: 'Whether or not to push the docker images after the build completes. Default: false'
     required: false
@@ -35,9 +51,11 @@ runs:
       uses: docker/setup-qemu-action@master
       with:
         platforms: ${{ inputs.architectures }}
+
     - uses: docker/setup-buildx-action@v2
       with:
         install: true
+
     - name: Cache Docker layers
       uses: actions/cache@v3
       with:
@@ -45,6 +63,16 @@ runs:
         key: buildx-${{ hashFiles(inputs.dockerfile, inputs.context) }}
         restore-keys: |
           buildx-
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ inputs.imageName }}
+        tags: |
+          type=sha
+          type=semver,pattern={{version}}
+
     - name: Github Packages Login
       uses: docker/login-action@v2
       if: ${{ inputs.pushImagesOnComplete == 'true' }}
@@ -52,6 +80,7 @@ runs:
         registry: 'ghcr.io'
         username: ${{ github.actor }}
         password: ${{ inputs.token }}
+
     - name: Build
       uses: docker/build-push-action@v3
       with:
@@ -64,4 +93,46 @@ runs:
         outputs: type=image
         platforms: ${{ inputs.architectures }}
         push: ${{ inputs.pushImagesOnComplete }}
-        tags: ${{ inputs.tags }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Setup cosign
+      #if: ${{ inputs.PushImagesOnComplete == 'true' }}
+      uses: sigstore/cosign-installer@main
+
+    - name: SBOM
+      #if: ${{ inputs.PushImagesOnComplete == 'true' }}
+      shell: bash
+      run: |
+        # Install syft & grype
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+        # Setup the cosign key
+        echo "${{ inputs.cosignPrivateKey }}" > cosign.key
+
+        # Attest the docker image
+        COSIGN_PASSWORD=$(cat password.txt) ./syft attest --key cosign.key -o spdx-json --recursive ${{ steps.meta.outputs.tags }} > out/container.att.json
+
+        # Check for vulnerabilities
+        grype out/container.sbom.json --add-cpes-if-none --fail-on critical --scope AllLayers
+
+    - uses: anchore/sbom-action@v0
+      #if: ${{ inputs.PushImagesOnComplete == 'true' }}
+      with:
+        image: ${{ steps.meta.outputs.tags }}
+        artifact-name: docker.sbom.json
+        output-file: out/docker.sbom.json
+        dependency-snapshot: true
+
+    - name: Sign with cosign
+      #if: ${{ inputs.PushImagesOnComplete == 'true' }}
+      shell: bash
+      env:
+        COSIGN_PRIVATE_KEY: ${{ inputs.cosignPrivateKey }}
+        COSIGN_PUBLIC_KEY: ${{ inputs.cosignPublicKey }}
+        COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
+        TAGS: ${{ steps.meta.outputs.tags }}
+      run: |
+        cosign sign -r --key env://COSIGN_PRIVATE_KEY ${TAGS}
+        cosign verify --key env://COSIGN_PUBLIC_KEY ${TAGS}
