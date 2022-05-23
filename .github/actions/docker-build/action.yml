@@ -96,7 +96,7 @@ runs:
         COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
       run: |
         # Attest the docker image
-        COSIGN_PASSWORD=${{ inputs.cosignPrivateKeyPassword }} ./syft attest --key cosign.key -o spdx-json --recursive ${{ steps.meta.outputs.tags }} > ${{ inputs.context }}/container.att.json
+        COSIGN_PASSWORD=${{ inputs.cosignPrivateKeyPassword }} syft attest --key cosign.key -o spdx-json --recursive ${{ steps.meta.outputs.tags }} > ${{ inputs.context }}/container.att.json
 
         # Check for vulnerabilities
         grype ${{ inputs.context }}/container.sbom.json --add-cpes-if-none --fail-on critical --scope AllLayers
