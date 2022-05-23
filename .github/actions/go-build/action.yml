@@ -105,7 +105,7 @@ runs:
         COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
         COSIGN_PUBLIC_KEY: ${{ inputs.cosignPublicKey }}
       run: |
-        for filename in ./ ; do
+        for filename in ./* ; do
           [ -e "$filename" ] || continue
           cosign sign-blob --key cosign.key --output-signature "$filename.sig" --output-certificate "$filename.pem" $filename 
           cosign verify-blob --key env://COSIGN_PUBLIC_KEY --signature "$filename.sig" $filename
