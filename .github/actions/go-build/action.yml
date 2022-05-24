@@ -99,6 +99,15 @@ runs:
           echo "::endgroup::"
         done
 
+    - name: Create & Verify SBOM
+      shell: bash
+      run: |
+        echo "Creating Software Bill of Materials (SBOM)..."
+        syft packages dir:. -o spdx-json > ${{inputs.outputDirectory}}/${{ inputs.appName }}.sbom.json
+
+        echo "Verifying dependencies..."
+        grype sbom:${{ inputs.appName }}.sbom.json -q --add-cpes-if-none --fail-on critical --scope AllLayers -o json > ${{inputs.outputDirectory}}/${{ inputs.appName }}.vulnerabilities.json
+
     - name: Sign Artefacts
       if: ${{ inputs.cosignPrivateKeyPassword != '' && inputs.cosignPublicKey != '' }}
       shell: bash
