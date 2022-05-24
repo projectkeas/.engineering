@@ -62,7 +62,7 @@ runs:
       uses: docker/metadata-action@v4
       with:
         images: ${{ inputs.imageName }}
-        flavour: |
+        flavor: |
           latest=false
         tags: |
           type=sha
