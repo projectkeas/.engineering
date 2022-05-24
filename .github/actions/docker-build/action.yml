@@ -109,5 +109,5 @@ runs:
         COSIGN_PASSWORD: ${{ inputs.cosignPrivateKeyPassword }}
         TAGS: ${{ steps.meta.outputs.tags }}
       run: |
-        cosign sign -r --key cosign.key ${TAGS}
-        cosign verify --key env://COSIGN_PUBLIC_KEY ${TAGS}
+        echo "${TAGS}" | xargs cosign sign -r --key cosign.key
+        echo "${TAGS}" | xargs cosign verify --key env://COSIGN_PUBLIC_KEY
