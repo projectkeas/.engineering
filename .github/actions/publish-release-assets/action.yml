@@ -11,6 +11,11 @@ runs:
     - name: Upload release files
       if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
       shell: bash
+      working-directory: ${{ inputs.outputDirectory }}
       run: |
         echo ${{ github.token }} | gh auth login --with-token
-        ls ${{ inputs.outputDirectory }} | while read filename;do gh release upload ${{ github.event.release.tag_name }} ${{ inputs.outputDirectory }}$filename; done
+        for filename in ./* ; do
+          [ -e "$filename" ] || continue
+          echo "Processing $filename ..."
+          gh release upload ${{ github.event.release.tag_name }} $filename
+        done
