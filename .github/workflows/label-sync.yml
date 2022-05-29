@@ -26,8 +26,10 @@ jobs:
             projectkeas/.engineering
             projectkeas/.github
             projectkeas/.template-service
+            projectkeas/connector-gitlab
+            projectkeas/crds
             projectkeas/helm
             projectkeas/iac
+            projectkeas/ingestion
             projectkeas/projectkeas.github.io
-            projectkeas/receiver-gitlab
             projectkeas/sdks-service
