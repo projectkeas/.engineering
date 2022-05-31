@@ -38,7 +38,7 @@ jobs:
 
       - name: Copy common files to new repo
         shell: bash
-        run: cp -rv ./src/common ./dest/common
+        run: cp -rv ./src/common/* ./dest/common/
 
       - name: Check For New Files
         id: newFiles
