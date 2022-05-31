@@ -60,10 +60,10 @@ jobs:
         env:
           GIT_USER: 'keas-bot:${{ secrets.BOT_TOKEN }}'
         run: |
+          git config --global user.name "keas [bot]"
+          git config --global user.email "${{ secrets.BOT_EMAIL }}"
+          git config --global user.passsword ${{ secrets.BOT_TOKEN }}
           git config -l
-          git config user.name "keas [bot]"
-          git config user.email "${{ secrets.BOT_EMAIL }}"
-          git config user.passsword ${{ secrets.BOT_TOKEN }}
           git commit -m "maint: Updated common files from ref: projectkeas/.engineering@$GITHUB_SHA"
           git push
 
