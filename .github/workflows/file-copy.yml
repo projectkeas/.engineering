@@ -1,0 +1,51 @@
+name: Update common files
+
+on: push
+
+jobs:
+  copy-file:
+    strategy:
+      matrix:
+        repository: [
+          '.engineering',
+          '.github'
+        ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: 'src'
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: 'dest'
+          repository: 'projectkeas/${{ matrix.repository }}'
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Copy common files to new repo
+        shell: bash
+        run: cp -r ./src/common ./dest/common
+
+      - name: Check For New Files
+        id: newFiles
+        shell: bash
+        working-directory: dest
+        run: |
+          git add -A
+          git status --porcelain | wc -l
+          if [[ $(git status --porcelain | wc -l) -gt 0 ]]; then
+            echo "::set-output name=hasNewFiles::true"
+          else
+            echo "::set-output name=hasNewFiles::false"
+          fi
+      - name: Push New Files
+        if: ${{ steps.newFiles.outputs.hasNewFiles == 'true' }}
+        shell: bash
+        working-directory: dest
+        run: |
+          git config user.name "keas [bot]"
+          git config user.email "${{ secrets.BOT_EMAIL }}"
+          git commit -m "Updated from ref: $GITHUB_SHA"
+          git push
