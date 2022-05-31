@@ -24,7 +24,7 @@ jobs:
         with:
           path: 'src'
           ref: 'main'
-          persist-credentials: false
+          token: ${{ secrets.BOT_TOKEN }}
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -33,13 +33,12 @@ jobs:
           ref: 'main'
           repository: 'projectkeas/${{ matrix.repository }}'
           token: ${{ secrets.BOT_TOKEN }}
-          persist-credentials: false
           fetch-depth: 0
 
       - name: Copy common files to new repo
         shell: bash
         working-directory: src/common
-        run: cp -rv ./ ../../dest/
+        run: cp -rv ./. ../../dest/
 
       - name: Check For New Files
         id: newFiles
