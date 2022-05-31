@@ -46,3 +46,8 @@
 - color: 1D76DB
   name: 'type: security'
   description: Represents a security issue
+
+# Generic labels
+- color: 1D76DB
+  name: 'skip-changelog'
+  description: Skips adding to the changelog for a release

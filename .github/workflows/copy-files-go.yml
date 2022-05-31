@@ -1,12 +1,14 @@
-name: Update common files
+name: Update common files (go)
 
 on:
   push:
     branches:
       - 'main'
     paths:
-      - '.github/workflows/file-copy.yml'
-      - 'common/**'
+      - '.github/workflows/copy-files-go.yml'
+      - 'files/go/**'
+
+concurrency: file-updates
 
 jobs:
   copy-file:
@@ -14,8 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         repository: [
-          '.engineering',
-          '.github'
+          '.template-service',
+          #'connector-gitlab',
+          #'ingestion',
+          #'sdks-service'
         ]
     runs-on: ubuntu-latest
     steps:
@@ -36,9 +40,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Copy common files to new repo
+      - name: Copy common go files to new repo
         shell: bash
-        run: cp -rvT src/common/ dest/
+        run: cp -rvT src/files/go/ dest/
 
       - name: Check For New Files
         id: newFiles
