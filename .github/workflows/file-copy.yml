@@ -34,6 +34,7 @@ jobs:
           repository: 'projectkeas/${{ matrix.repository }}'
           token: ${{ secrets.BOT_TOKEN }}
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Copy common files to new repo
         shell: bash
@@ -63,4 +64,4 @@ jobs:
           git config user.name "keas [bot]"
           git config user.email "${{ secrets.BOT_EMAIL }}"
           git commit -m "maint: Updated common files from ref: projectkeas/.engineering@$GITHUB_SHA"
-          git push
+          git push "https://keas-bot:${{ secrets.BOT_TOKEN }}@github.com/projectkeas/${{ matrix.repository }}.git" main
