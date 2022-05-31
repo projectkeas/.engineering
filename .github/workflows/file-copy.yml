@@ -11,6 +11,7 @@ on:
 jobs:
   copy-file:
     strategy:
+      fail-fast: false
       matrix:
         repository: [
           '.engineering',
@@ -58,6 +59,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
+          git config -l
+          git config --local --unset-all "http.https://github.com/.extraheader"
           git config user.name "keas [bot]"
           git config user.email "${{ secrets.BOT_EMAIL }}"
           git commit -m "maint: Updated common files from ref: projectkeas/.engineering@$GITHUB_SHA"
