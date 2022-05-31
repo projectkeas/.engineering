@@ -17,9 +17,9 @@ jobs:
       matrix:
         repository: [
           '.template-service',
-          #'connector-gitlab',
-          #'ingestion',
-          #'sdks-service'
+          'connector-gitlab',
+          'ingestion',
+          'sdks-service'
         ]
     runs-on: ubuntu-latest
     steps:
