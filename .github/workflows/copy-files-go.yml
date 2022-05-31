@@ -18,6 +18,7 @@ jobs:
         repository: [
           '.template-service',
           'connector-gitlab',
+          'connector-spacelift',
           'ingestion',
           'sdks-service'
         ]
