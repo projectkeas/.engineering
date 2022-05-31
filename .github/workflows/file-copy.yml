@@ -1,6 +1,11 @@
 name: Update common files
 
-on: push
+on:
+  branches:
+    - 'main'
+  push:
+    - '.github/workflows/file-copy.yml'
+    - 'common/**'
 
 jobs:
   copy-file:
@@ -26,7 +31,7 @@ jobs:
 
       - name: Copy common files to new repo
         shell: bash
-        run: cp -r ./src/common ./dest/common
+        run: cp -rv ./src/common ./dest/common
 
       - name: Check For New Files
         id: newFiles
@@ -40,12 +45,15 @@ jobs:
           else
             echo "::set-output name=hasNewFiles::false"
           fi
+
       - name: Push New Files
         if: ${{ steps.newFiles.outputs.hasNewFiles == 'true' }}
         shell: bash
         working-directory: dest
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           git config user.name "keas [bot]"
           git config user.email "${{ secrets.BOT_EMAIL }}"
-          git commit -m "Updated from ref: $GITHUB_SHA"
+          git commit -m "maint: Updated common files from ref: projectkeas/.engineering@$GITHUB_SHA"
           git push
