@@ -24,7 +24,7 @@ jobs:
         with:
           path: 'src'
           ref: 'main'
-          token: ${{ secrets.BOT_TOKEN }}
+          persist-credentials: false
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -34,11 +34,11 @@ jobs:
           repository: 'projectkeas/${{ matrix.repository }}'
           token: ${{ secrets.BOT_TOKEN }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Copy common files to new repo
         shell: bash
-        working-directory: src/common
-        run: cp -rv ./. ../../dest/
+        run: cp -rvT src/common/ dest/
 
       - name: Check For New Files
         id: newFiles
@@ -58,10 +58,12 @@ jobs:
         shell: bash
         working-directory: dest
         env:
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GIT_USER: 'keas-bot:${{ secrets.BOT_TOKEN }}'
         run: |
           git config -l
           git config user.name "keas [bot]"
           git config user.email "${{ secrets.BOT_EMAIL }}"
+          git config user.passsword ${{ secrets.BOT_TOKEN }}
           git commit -m "maint: Updated common files from ref: projectkeas/.engineering@$GITHUB_SHA"
-          git push "https://keas-bot:${{ secrets.BOT_TOKEN }}@github.com/projectkeas/${{ matrix.repository }}.git" main
+          git push
+
