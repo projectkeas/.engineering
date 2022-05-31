@@ -57,8 +57,8 @@ jobs:
         shell: bash
         working-directory: dest
         run: |
-          git config --global user.name "keas [bot]"
-          git config --global user.email "${{ secrets.BOT_EMAIL }}"
+          #git config --global user.name "keas [bot]"
+          #git config --global user.email "${{ secrets.BOT_EMAIL }}"
           git commit -m "maint: Updated common files from ref: projectkeas/.engineering@$GITHUB_SHA"
           git push
 
