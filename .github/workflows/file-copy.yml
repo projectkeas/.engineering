@@ -33,7 +33,7 @@ jobs:
           ref: 'main'
           repository: 'projectkeas/${{ matrix.repository }}'
           token: ${{ secrets.BOT_TOKEN }}
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Copy common files to new repo
         shell: bash
@@ -60,7 +60,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           git config -l
-          git config --local --unset-all "http.https://github.com/.extraheader"
           git config user.name "keas [bot]"
           git config user.email "${{ secrets.BOT_EMAIL }}"
           git commit -m "maint: Updated common files from ref: projectkeas/.engineering@$GITHUB_SHA"
