@@ -26,6 +26,7 @@ jobs:
             projectkeas/.engineering
             projectkeas/.github
             projectkeas/.template-service
+            projectkeas/connector-github
             projectkeas/connector-gitlab
             projectkeas/connector-spacelift
             projectkeas/crds
