@@ -19,6 +19,7 @@ jobs:
           '.engineering',
           '.github',
           '.template-service',
+          'connector-github',
           'connector-gitlab',
           'crds',
           'helm',
