@@ -51,3 +51,9 @@
 - color: 1D76DB
   name: 'skip-changelog'
   description: Skips adding to the changelog for a release
+- color: FBCA04
+  name: 'hacktoberfest-accepted'
+  description: A pull request that has been accepted on behalf of hacktoberfest
+- color: FBCA04
+  name: 'hacktoberfest'
+  description: An issue that when worked on, will have hacktoberfest-accepted added to the PR by the maintainers
