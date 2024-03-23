@@ -33,13 +33,13 @@ runs:
   using: 'composite'
   steps:
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ inputs.version }}
         check-latest: ${{ inputs.checkForLatestVersion }}
 
     - name: Cache Go Modules
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cache/go-build
@@ -84,7 +84,7 @@ runs:
         done
 
     - name: Run StaticCheck
-      uses: dominikh/staticcheck-action@v1.2.0
+      uses: dominikh/staticcheck-action@v1.3.1
       with:
         version: latest
         install-go: false
